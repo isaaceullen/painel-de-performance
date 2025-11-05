@@ -1,913 +1,965 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Camerite • Performance Semanal/Mensal</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<style>
-  :root{
-    --camerite-primary:#7B48EA;
-    --camerite-dark:#29184E;
-    --camerite-soft:#D3C2F8;
-    --camerite-white:#FFFFFF;
-    --bg-1:#0f0b1f;
-    --bg-2:#1b1140;
-    --text-1:#F7F7FB;
-    --text-2:#CFCFE6;
-    --ok:#5CE6AC;
-    --warn:#FFE466;
-    --err:#FF7373;
-    --muted:#4A4270;
-    --card:#1c1538;
-    --card-2:#221a47;
-    --border:#2f245f;
-    --shadow: 0 10px 30px rgba(0,0,0,.25);
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;
-    font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    color:var(--text-1);
-    background:
-      radial-gradient(1200px 600px at 80% -10%, rgba(123,72,234,.35), transparent 60%),
-      radial-gradient(1000px 600px at -10% 110%, rgba(211,194,248,.25), transparent 60%),
-      linear-gradient(180deg, var(--bg-2), var(--bg-1) 60%);
-  }
-  header{
-    position:sticky; top:0; z-index:10;
-    backdrop-filter:saturate(140%) blur(6px);
-    background:rgba(17,10,40,.6);
-    border-bottom:1px solid var(--border);
-    box-shadow:var(--shadow);
-  }
-  .wrap{max-width:1200px;margin:0 auto;padding:16px 20px}
-  .brand{
-    display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.3px
-  }
-  .badge{padding:2px 8px;border-radius:20px;background:linear-gradient(135deg,var(--camerite-primary),#52309C);font-size:12px}
-  .controls{display:grid;grid-template-columns:repeat(6, minmax(120px,1fr));gap:10px;margin-top:10px}
-  select, input[type="number"], input[type="text"]{
-    width:100%;padding:10px 12px;border-radius:12px;background:var(--card);
-    color:var(--text-1);border:1px solid var(--border);outline:none
-  }
-  .container{max-width:1200px;margin:24px auto;padding:0 20px 60px}
-  .grid{display:grid;gap:16px}
-  .grid.cols-2{grid-template-columns:1.2fr .8fr}
-  @media (max-width:1100px){.grid.cols-2{grid-template-columns:1fr}}
-  .card{
-    background:linear-gradient(180deg, var(--card-2), var(--card));
-    border:1px solid var(--border);
-    border-radius:18px;padding:16px;box-shadow:var(--shadow)
-  }
-  .card h3{margin:0 0 10px 0;font-size:16px;color:#EDEDF9}
-  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
-  @media (max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
-  .kpi{
-    background:linear-gradient(180deg, #2a1d5a, #211648);
-    border:1px solid var(--border);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:6px
-  }
-  .kpi small{color:var(--text-2)}
-  .kpi b{font-size:22px}
-  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
-  .tab-btn{
-    padding:10px 14px;border:1px solid var(--border);border-radius:999px;background:#1f1646;color:var(--text-2);
-    cursor:pointer
-  }
-  .tab-btn.active{background:linear-gradient(135deg,var(--camerite-primary),#52309C);color:white;border-color:transparent}
-  .tab{display:none}
-  .tab.active{display:block}
-  .flex{display:flex;gap:12px;flex-wrap:wrap}
-  .btn{
-    appearance:none;border:1px solid var(--border);background:#20174a;color:var(--text-1);
-    padding:10px 14px;border-radius:12px;cursor:pointer
-  }
-  .btn.primary{background:linear-gradient(135deg,var(--camerite-primary),#52309C);border-color:transparent}
-  .btn.ghost{background:transparent}
-  .btn.danger{background:#3a1730;border-color:#6a254d}
-  table{width:100%;border-collapse:collapse;margin-top:8px}
-  th, td{border-bottom:1px solid var(--border);padding:8px 10px;text-align:right}
-  th:first-child, td:first-child{text-align:left}
-  thead th{position:sticky;top:0;background:#1c1538}
-  .muted{color:var(--text-2)}
-  .group-title{margin-top:18px;font-weight:700}
-  .pill{background:#2b2157;border:1px solid var(--border);padding:4px 10px;border-radius:999px;color:var(--text-2);font-size:12px}
-  .row-controls{display:flex;gap:6px}
-  .inline{display:inline-flex;gap:8px;align-items:center}
-  .note{font-size:12px;color:var(--text-2)}
-  .footer-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:8px}
-  .danger-text{color:#ff8ba1}
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Camerite — Dashboard (Dark)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root{
+      --bg:#0c0a14;--bg-soft:#151026;--bg-softer:#1e1640;--text:#f2edff;--muted:#bfb6db;
+      --brand:#7b48ea;--brand-2:#d3c2f8;--brand-3:#29184e;
+      --line:#2a214a;--chip:#241b48;--ok:#34d399;--warn:#f59e0b;--err:#ef4444;
+      --radius:14px;--radius-lg:18px;--shadow:0 8px 24px rgba(0,0,0,.35)
+    }
+    *{box-sizing:border-box}
+    html,body{
+      height:100%;
+      background:
+        radial-gradient(900px 600px at 15% -10%, rgba(123,72,234,.15), transparent 45%),
+        radial-gradient(900px 600px at 110% 0%, rgba(211,194,248,.12), transparent 45%),
+        var(--bg);
+      color:var(--text);
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      overflow-x:hidden; /* apenas scroll vertical */
+      line-height:1.35
+    }
+    a{color:var(--brand)}
+    .container{max-width:1224px;margin:0 auto;padding:100px 18px 28px}
+
+    /* Appbar fixo */
+    .appbar{position:sticky;top:0;z-index:50;background:rgba(12,10,20,.72);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+    .appbar .inner{max-width:1224px;margin:0 auto;padding:10px 12px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .brand{display:flex;gap:10px;align-items:center;font-weight:700}
+    .dot{width:10px;height:10px;border-radius:999px;background:linear-gradient(135deg,var(--brand),var(--brand-2));box-shadow:0 0 0 4px rgba(123,72,234,.18)}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+    .select,.button,.input,.toggle{background:var(--bg-softer);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 12px;font-size:.95rem;outline:none}
+    .button{cursor:pointer}
+    .toggle{display:flex;gap:6px;align-items:center}
+    .toggle input{accent-color:var(--brand)}
+
+    /* Seg tabs */
+    .seg-tabs{display:flex;gap:8px;flex-wrap:wrap;margin: 10px 0 16px}
+    .seg-tab{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:var(--chip);cursor:pointer;user-select:none}
+    .seg-tab.active{background:linear-gradient(135deg,var(--brand-3),var(--bg-softer));border-color:#3b2a73;box-shadow:inset 0 0 0 1px rgba(211,194,248,.16)}
+
+    /* Cards / grids */
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    .col-12{grid-column:span 12}.col-8{grid-column:span 8}.col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}
+    @media (max-width: 980px){.col-8,.col-6,.col-4,.col-3{grid-column:span 12}}
+    .card{background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow)}
+    .card h3{margin:0 0 10px;font-size:1.05rem}
+    .section-title{display:flex;align-items:center;justify-content:space-between;margin:10px 0 12px}
+    .section-title h2{margin:0;font-size:1.2rem}
+    .note{color:var(--muted);font-size:.85rem}
+
+    /* Tabela semanas fixas */
+    .wk{width:100%;border-collapse:collapse;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .wk thead th{background:linear-gradient(180deg,#221a42,#1b1435);position:sticky;top:0;border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;font-weight:600}
+    .wk tbody td{border-bottom:1px solid var(--line);padding:6px 8px;vertical-align:middle}
+    .row-label{white-space:nowrap;color:var(--muted)}
+    .num{width:100%;max-width:120px;background:var(--bg-softer);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 10px;font-variant-numeric:tabular-nums}
+
+    /* Pills */
+    .pill{display:inline-flex;gap:6px;align-items:center;background:var(--chip);border:1px solid var(--line);color:var(--text);border-radius:999px;padding:6px 10px;font-size:.9rem}
+    .pill .x{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#3a2c74;cursor:pointer;font-weight:700}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn-sm{padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg-softer);color:var(--text);cursor:pointer;font-size:.85rem}
+    .btn-primary{background:linear-gradient(135deg,var(--brand),var(--brand-2));border-color:#5f35c4}
+    .mode{font-size:.78rem;color:var(--muted);padding:4px 8px;border-radius:999px;background:var(--chip);border:1px solid var(--line)}
+
+    .kpis{display:flex;gap:12px;flex-wrap:wrap}
+    .kpi{min-width:160px;flex:1;background:linear-gradient(180deg,#1a1238,#130d29);border:1px solid var(--line);border-radius:12px;padding:12px}
+    .kpi .v{font-weight:700;font-size:1.1rem}
+  </style>
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <div class="brand">
-      <span style="width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,var(--camerite-primary),#52309C);display:inline-block"></span>
-      <span>Camerite • <span class="muted">Painel de Performance</span></span>
-      <span class="badge">Beta</span>
-    </div>
-
-    <div class="controls">
-      <select id="segment">
-        <option value="white-label">White Label</option>
-        <option value="franquias">Franquias</option>
-      </select>
-      <select id="year"></select>
-      <select id="month"></select>
-      <div class="inline">
-        <input id="weeks" type="number" min="1" max="6" value="4" />
-      </div>
-      <button class="btn" id="saveBtn">Salvar (local)</button>
-      <div class="inline" style="justify-content:flex-end">
-        <button class="btn ghost" id="importBtn">Importar JSON</button>
-        <button class="btn ghost" id="exportBtn">Exportar JSON</button>
+  <!-- HEADER -->
+  <div class="appbar">
+    <div class="inner">
+      <div class="brand"><span class="dot"></span> Camerite — Dashboard</div>
+      <div class="toolbar">
+        <select id="yearSelect" class="select" title="Ano">
+          <option>2025</option><option>2026</option><option>2027</option><option>2028</option><option>2029</option><option>2030</option>
+        </select>
+        <select id="monthSelect" class="select" title="Mês">
+          <option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option><option value="3">Abril</option>
+          <option value="4">Maio</option><option value="5">Junho</option><option value="6">Julho</option><option value="7">Agosto</option>
+          <option value="8">Setembro</option><option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option>
+        </select>
+        <label class="toggle"><input id="modeToggle" type="checkbox"/> <span>Ver anual (mês a mês)</span></label>
+        <button id="importBtn" class="button">Importar JSON</button>
+        <button id="exportBtn" class="button btn-primary">Exportar JSON</button>
       </div>
     </div>
   </div>
-</header>
 
-<main class="container">
-  <section class="grid cols-2">
-    <div class="card">
-      <h3>KPIs do Mês Selecionado</h3>
-      <div class="kpis" id="kpiGrid">
-        <!-- KPIs preenchidos via JS -->
+  <div class="container">
+    <!-- SEGMENTOS -->
+    <div class="section-title">
+      <h2>Segmento</h2>
+      <span class="note">5 semanas fixas • Se o mês importado vier com <b>weeks = 0</b>, nada é exibido.</span>
+    </div>
+    <div class="seg-tabs" id="segTabs">
+      <div class="seg-tab active" data-seg="Franquias">Franquias</div>
+      <div class="seg-tab" data-seg="White Label">White Label</div>
+      <div class="seg-tab" data-seg="Redes Sociais">Redes Sociais</div>
+    </div>
+
+    <!-- ======= KPI RESUMO (Franquias / White Label) ======= -->
+    <div id="kpiBar" class="grid" style="margin-bottom:10px">
+      <div class="card col-12">
+        <div class="kpis">
+          <div class="kpi"><div class="note">Investimento Total (Mês)</div><div id="kpiInvest" class="v">R$ 0,00</div></div>
+          <div class="kpi"><div class="note">Leads (Mês)</div><div id="kpiLeads" class="v">0</div></div>
+          <div class="kpi"><div class="note">Oportunidades (Mês)</div><div id="kpiOpp" class="v">0</div></div>
+          <div class="kpi"><div class="note">Vendas (Mês)</div><div id="kpiSales" class="v">0</div></div>
+          <div class="kpi"><div class="note">CAC Médio (Mês)</div><div id="kpiCAC" class="v">R$ 0,00</div></div>
+        </div>
       </div>
     </div>
-    <div class="card">
-      <h3>Visão Rápida</h3>
-      <div class="flex">
-        <span class="pill" id="pill-segment">Segmento</span>
-        <span class="pill" id="pill-periodo">Período</span>
-        <span class="pill">Semanas: <b id="pill-weeks">4</b></span>
-      </div>
-      <p class="note" style="margin-top:10px">
-        • CPL = Investimento ÷ Leads (pago) • CAC = Total investido (Meta + Google) ÷ Vendas •
-        Valores e linhas totais são calculados automaticamente. 
-      </p>
-    </div>
-  </section>
 
-  <section class="card">
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="tabela">Tabela</button>
-      <button class="tab-btn" data-tab="dashboard">Dashboard</button>
-      <button class="tab-btn" data-tab="sociais">Redes Sociais</button>
-      <button class="tab-btn" data-tab="ajuda">Ajuda</button>
-    </div>
+    <!-- ===================== INPUTS — FRANQUIAS / WHITE LABEL ===================== -->
+    <div id="fwArea">
 
-    <!-- TABELA -->
-    <div class="tab active" id="tabela">
       <!-- ORGÂNICO -->
-      <h3 class="group-title">Orgânico</h3>
-      <div class="inline" style="margin:6px 0 8px 0">
-        <button class="btn" id="addOrganicSource">+ Adicionar origem</button>
-        <span class="note">Ex.: Bing, Google, Link na Bio, Tallos…</span>
-      </div>
-      <div id="organicTableWrap"></div>
+      <div class="section-title"><h2>Orgânico</h2><span class="note">Gerencie as fontes e Landing Pages (leads por semana).</span></div>
 
-      <!-- SITE + LANDING PAGES -->
-      <div class="flex" style="margin-top:16px">
-        <div style="flex:1">
-          <h3 class="group-title">Site</h3>
-          <div class="inline" style="margin:6px 0 8px 0">
-            <button class="btn" id="addSiteSub">+ Adicionar origem do site</button>
-            <span class="note">Ex.: contato-site…</span>
+      <div class="grid">
+        <!-- Origens de Tráfego -->
+        <div class="card col-6">
+          <h3>Origens de Tráfego</h3>
+          <div class="row" style="margin-bottom:8px">
+            <input id="orgNewSource" class="input" placeholder="Nova origem (ex.: Google, Bing, Site)"/>
+            <button id="btnAddSource" class="btn-sm">Adicionar origem</button>
           </div>
-          <div id="siteTableWrap"></div>
+          <div id="orgSourceList" class="row"></div>
+          <div id="orgSourceTables"></div>
         </div>
-        <div style="flex:1">
-          <h3 class="group-title">Landing Pages</h3>
-          <div class="inline" style="margin:6px 0 8px 0">
-            <button class="btn" id="addLpSub">+ Adicionar landing</button>
-            <span class="note">Ex.: white-label, newsletter, outros…</span>
+
+        <!-- Landing Pages -->
+        <div class="card col-6">
+          <h3>Landing Pages</h3>
+          <div class="row" style="margin-bottom:8px">
+            <input id="lpNew" class="input" placeholder="Nova LP (ex.: LP Segurança Bairro)"/>
+            <button id="btnAddLP" class="btn-sm">Adicionar LP</button>
           </div>
-          <div id="lpTableWrap"></div>
+          <div id="lpList" class="row"></div>
+          <div id="lpTables"></div>
         </div>
       </div>
-
-      <!-- TOTAL / AWARENESS / ENGAJAMENTO ORGÂNICO -->
-      <div id="organicMetaWrap" style="margin-top:14px"></div>
-
-      <hr style="border:0;border-top:1px solid var(--border);margin:22px 0">
 
       <!-- PAGO -->
-      <h3 class="group-title">Pago</h3>
-      <div id="paidWrap"></div>
-
-      <div id="paidMetaWrap" style="margin-top:14px"></div>
-
-      <hr style="border:0;border-top:1px solid var(--border);margin:22px 0">
-
-      <!-- PIPELINE -->
-      <h3 class="group-title">Pipeline Comercial</h3>
-      <div id="pipelineWrap"></div>
-
-      <div class="footer-actions">
-        <button class="btn danger" id="clearMonth">Limpar mês</button>
-      </div>
-    </div>
-
-    <!-- DASHBOARD -->
-    <div class="tab" id="dashboard">
+      <div class="section-title" style="margin-top:18px"><h2>Pago</h2><span class="note">Meta Ads e Google Ads — com Leads Planejados e Conquistados.</span></div>
       <div class="grid">
-        <div class="card">
-          <h3>Evolução semanal — Leads (Orgânico x Pago)</h3>
-          <canvas id="chartLeads"></canvas>
+        <div class="card col-12">
+          <h3>Meta Ads</h3>
+          <table class="wk" id="tblMeta">
+            <thead>
+              <tr><th>Métrica</th><th>Semana 1</th><th>Semana 2</th><th>Semana 3</th><th>Semana 4</th><th>Semana 5</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+              <tr data-m="investimento"><td class="row-label">Investimento (R$)</td>
+                <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+              <tr data-m="alcance"><td class="row-label">Alcance</td>
+                <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+              <tr data-m="impressoes"><td class="row-label">Impressões</td>
+                <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+              <tr data-m="cliques"><td class="row-label">Cliques</td>
+                <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+              <tr data-m="ctr"><td class="row-label">CTR (%)</td>
+                <td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td class="total"></td></tr>
+              <tr data-m="sessoes"><td class="row-label">Sessões</td>
+                <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+              <tr data-m="leadsPlan"><td class="row-label">Leads (Planejados)</td>
+                <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+              <tr data-m="leads"><td class="row-label">Leads (Conquistados)</td>
+                <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+            </tbody>
+          </table>
         </div>
-        <div class="card">
-          <h3>Investimento semanal — Meta + Google</h3>
-          <canvas id="chartInvest"></canvas>
-        </div>
-        <div class="card">
-          <h3>CPL semanal (pago)</h3>
-          <canvas id="chartCPL"></canvas>
-        </div>
-        <div class="card">
-          <h3>Distribuição mensal de Leads (por origem orgânica)</h3>
-          <canvas id="chartPieOrganic"></canvas>
-        </div>
-        <div class="card">
-          <h3>Awareness & Engajamento — Totais Semanais (pago)</h3>
-          <canvas id="chartAwEng"></canvas>
+
+        <div class="card col-12">
+          <h3>Google Ads</h3>
+          <table class="wk" id="tblGoogle">
+            <thead>
+              <tr><th>Métrica</th><th>Semana 1</th><th>Semana 2</th><th>Semana 3</th><th>Semana 4</th><th>Semana 5</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+              <tr data-m="investimento"><td class="row-label">Investimento (R$)</td>
+                <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+              <tr data-m="alcance"><td class="row-label">Alcance</td>
+                <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+              <tr data-m="impressoes"><td class="row-label">Impressões</td>
+                <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+              <tr data-m="cliques"><td class="row-label">Cliques</td>
+                <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+              <tr data-m="ctr"><td class="row-label">CTR (%)</td>
+                <td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td class="total"></td></tr>
+              <tr data-m="sessoes"><td class="row-label">Sessões</td>
+                <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+              <tr data-m="leadsPlan"><td class="row-label">Leads (Planejados)</td>
+                <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+              <tr data-m="leads"><td class="row-label">Leads (Conquistados)</td>
+                <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
-    </div>
 
-    <!-- REDES SOCIAIS -->
-    <div class="tab" id="sociais">
-      <div class="inline" style="margin:6px 0 8px 0">
-        <button class="btn" id="addSocial">+ Adicionar rede</button>
-        <span class="note">Ex.: Instagram, LinkedIn, YouTube…</span>
-      </div>
-      <div id="socialsWrap"></div>
-    </div>
-
-    <!-- AJUDA -->
-    <div class="tab" id="ajuda">
-      <div class="grid">
-        <div class="kpi">
-          <small>Como salvar</small>
-          <b>Salvar (local)</b>
-          <small class="muted">Grava no seu navegador; use “Exportar JSON” para backup e versionamento no Git.</small>
-        </div>
-        <div class="kpi">
-          <small>Importar</small>
-          <b>Importar JSON</b>
-          <small class="muted">Carrega um arquivo salvo anteriormente (mesma estrutura de dados).</small>
-        </div>
-      </div>
-      <p class="note" style="margin-top:10px">
-        Dica: mantenha **White Label** e **Franquias** atualizados separadamente e exporte um JSON por mês/ano para versionar no repositório.
-      </p>
-    </div>
-  </section>
-</main>
-
-<input type="file" id="fileInput" accept="application/json" style="display:none"/>
-
-<script>
-/* =============== UTIL ================== */
-const currency = (v) => {
-  if (v === null || v === undefined || isNaN(v)) return "R$ 0,00";
-  return v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
-};
-const num = (v) => Number(v ?? 0) || 0;
-const id = (s) => document.getElementById(s);
-const weeksLabels = (n) => Array.from({length:n}, (_,i)=>`S${i+1}`);
-
-/* =============== ESTADO =============== */
-const INITIAL_SOURCES = ["Bing","Google","Link na Bio","Tallos"];
-const INITIAL_SITE = ["contato-site"];
-const INITIAL_LPS = ["white-label","newsletter","outros"];
-const YEAR_NOW = new Date().getFullYear();
-
-const state = {
-  segment: 'white-label',
-  year: YEAR_NOW,
-  month: new Date().getMonth(), // 0-11
-  weeks: 4,
-  data: {} // [segment][year][month] -> payload
-};
-
-function ensureMonth(){
-  const {segment,year,month,weeks} = state;
-  state.data[segment] ??= {};
-  state.data[segment][year] ??= {};
-  if(!state.data[segment][year][month]){
-    // cria payload vazio
-    const emptyWeeks = Array.from({length:weeks},()=>0);
-    const makeWeeklyObj = (name)=>({name, weeks: Array.from({length:weeks},()=>0)});
-    const organic = {
-      sources: INITIAL_SOURCES.map(s=>makeWeeklyObj(s)),
-      site: INITIAL_SITE.map(s=>makeWeeklyObj(s)),
-      lps: INITIAL_LPS.map(s=>makeWeeklyObj(s)),
-      awareness: { weeks:[...emptyWeeks] },
-      engagement:{ weeks:[...emptyWeeks] },
-    };
-    const paidGroup = ()=>({
-      leads:{weeks:[...emptyWeeks]},
-      leadsPlan:{weeks:[...emptyWeeks]},
-      invest:{weeks:[...emptyWeeks]}
-    });
-    const paid = {
-      meta: paidGroup(),
-      google: paidGroup(),
-      awareness:{weeks:[...emptyWeeks]},
-      engagement:{weeks:[...emptyWeeks]},
-    };
-    const pipeline = {
-      agendamentos:{weeks:[...emptyWeeks]},
-      reunioes:{weeks:[...emptyWeeks]},
-      noShow:{weeks:[...emptyWeeks]},
-      vendas:{weeks:[...emptyWeeks]},
-      perdidos:{weeks:[...emptyWeeks]},
-      // opcionais
-      oportunidades:{weeks:[...emptyWeeks]},
-    };
-    const socials = {
-      networks: [
-        {name:"Instagram", metrics:{
-          visitas:{weeks:[...emptyWeeks]},
-          likes:{weeks:[...emptyWeeks]},
-          comentarios:{weeks:[...emptyWeeks]},
-          compartilhamentos:{weeks:[...emptyWeeks]},
-        }},
-      ]
-    };
-    state.data[segment][year][month] = {weeks, organic, paid, pipeline, socials};
-  }else{
-    // se semanas mudaram, ajusta arrays
-    const payload = state.data[segment][year][month];
-    if(payload.weeks !== weeks){
-      const resize = (arr)=> {
-        const copy = [...arr];
-        if(weeks > copy.length)
-          return copy.concat(Array.from({length:weeks-copy.length},()=>0));
-        else
-          return copy.slice(0,weeks);
-      };
-      const eachWeekly = [];
-      // Organic
-      payload.organic.sources.forEach(o=>{o.weeks=resize(o.weeks)});
-      payload.organic.site.forEach(o=>{o.weeks=resize(o.weeks)});
-      payload.organic.lps.forEach(o=>{o.weeks=resize(o.weeks)});
-      payload.organic.awareness.weeks = resize(payload.organic.awareness.weeks);
-      payload.organic.engagement.weeks = resize(payload.organic.engagement.weeks);
-      // Paid
-      ["meta","google"].forEach(k=>{
-        payload.paid[k].leads.weeks = resize(payload.paid[k].leads.weeks);
-        payload.paid[k].leadsPlan.weeks = resize(payload.paid[k].leadsPlan.weeks);
-        payload.paid[k].invest.weeks = resize(payload.paid[k].invest.weeks);
-      });
-      payload.paid.awareness.weeks = resize(payload.paid.awareness.weeks);
-      payload.paid.engagement.weeks = resize(payload.paid.engagement.weeks);
-      // Pipeline
-      Object.values(payload.pipeline).forEach(obj=>{obj.weeks=resize(obj.weeks)});
-      // Socials
-      payload.socials.networks.forEach(net=>{
-        Object.values(net.metrics).forEach(m=> m.weeks = resize(m.weeks));
-      });
-      payload.weeks = weeks;
-    }
-  }
-  return state.data[segment][year][month];
-}
-
-/* =============== RENDER =============== */
-function renderAll(){
-  const payload = ensureMonth();
-  id('pill-segment').textContent = (state.segment==='white-label'?'White Label':'Franquias');
-  id('pill-periodo').textContent = `${MONTHS[state.month]} / ${state.year}`;
-  id('pill-weeks').textContent = payload.weeks;
-
-  renderOrganicTables(payload);
-  renderPaid(payload);
-  renderPipeline(payload);
-  renderKPIs(payload);
-  renderSocials(payload);
-  renderCharts(payload);
-}
-
-const MONTHS = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-
-function sum(arr){return arr.reduce((a,b)=>a+num(b),0)}
-function tableWeeklyHeader(n, extra=[]) {
-  const th = weeksLabels(n).map(l=>`<th>${l}</th>`).join('');
-  const extraTh = extra.map(x=>`<th>${x}</th>`).join('');
-  return `<thead><tr><th>Origem</th>${th}<th>Total</th>${extraTh}<th></th></tr></thead>`;
-}
-function rowNumberInputs(weeks, arr, onChange){
-  return weeksLabels(weeks).map((_,i)=>`
-    <td><input type="number" step="1" min="0" value="${num(arr[i])}" 
-      oninput="${onChange}(this, ${i})" style="width:100%;background:#180f3a;border:1px solid var(--border);border-radius:8px;padding:6px;color:var(--text-1)"></td>
-  `).join('');
-}
-function renderListTable({title, list, containerId, weeks, onChangeName, onChangeWeek, onAdd, onRemove}){
-  const wrap = id(containerId);
-  const header = tableWeeklyHeader(weeks);
-  const rows = list.map((o,idx)=>`
-    <tr>
-      <td>
-        <div class="row-controls">
-          <input type="text" value="${o.name}" oninput="${onChangeName}(this, ${idx})"
-            style="width:100%;background:#180f3a;border:1px solid var(--border);border-radius:8px;padding:6px;color:var(--text-1)">
-        </div>
-      </td>
-      ${rowNumberInputs(weeks, o.weeks, `${onChangeWeek}.bind(null, ${idx})`)}
-      <td class="muted"><b>${sum(o.weeks)}</b></td>
-      <td style="text-align:right"><button class="btn danger" onclick="${onRemove}(${idx})">Remover</button></td>
-    </tr>
-  `).join('');
-  wrap.innerHTML = `
-    <div class="card">
-      <table>${header}<tbody>${rows || ''}</tbody></table>
-      <div class="footer-actions"><button class="btn" onclick="${onAdd}()">+ Adicionar linha</button></div>
-    </div>
-  `;
-}
-
-function renderOrganicTables(payload){
-  // orgânico livres
-  renderListTable({
-    title:"Orgânico",
-    list: payload.organic.sources,
-    containerId:"organicTableWrap",
-    weeks: payload.weeks,
-    onChangeName:"onOrganicName",
-    onChangeWeek:"onOrganicWeek",
-    onAdd:"onOrganicAdd",
-    onRemove:"onOrganicRemove"
-  });
-  // site
-  renderListTable({
-    title:"Site",
-    list: payload.organic.site,
-    containerId:"siteTableWrap",
-    weeks: payload.weeks,
-    onChangeName:"onSiteName",
-    onChangeWeek:"onSiteWeek",
-    onAdd:"onSiteAdd",
-    onRemove:"onSiteRemove"
-  });
-  // lps
-  renderListTable({
-    title:"LPs",
-    list: payload.organic.lps,
-    containerId:"lpTableWrap",
-    weeks: payload.weeks,
-    onChangeName:"onLpName",
-    onChangeWeek:"onLpWeek",
-    onAdd:"onLpAdd",
-    onRemove:"onLpRemove"
-  });
-
-  // Totais / Awareness / Engajamento
-  const wrap = id('organicMetaWrap');
-  const weeks = payload.weeks;
-  const totalSemanal = Array.from({length:weeks},(_,i)=>{
-    const sumSources = payload.organic.sources.reduce((a,o)=>a+num(o.weeks[i]),0);
-    const sumSite = payload.organic.site.reduce((a,o)=>a+num(o.weeks[i]),0);
-    const sumLps = payload.organic.lps.reduce((a,o)=>a+num(o.weeks[i]),0);
-    return sumSources + sumSite + sumLps;
-  });
-  const tableRow = (label, arr, hook)=>`
-    <tr>
-      <td>${label}</td>
-      ${rowNumberInputs(weeks, arr, hook)}
-      <td class="muted"><b>${sum(arr)}</b></td>
-      <td></td>
-    </tr>`;
-  wrap.innerHTML = `
-    <div class="card">
-      <table>${tableWeeklyHeader(weeks)}
-        <tbody>
-          <tr>
-            <td><b>Total (orgânico)</b></td>
-            ${totalSemanal.map(v=>`<td class="muted">${v}</td>`).join('')}
-            <td class="muted"><b>${sum(totalSemanal)}</b></td>
-            <td></td>
-          </tr>
-          ${tableRow('Awareness (alcance + impressões)', payload.organic.awareness.weeks, 'onOrganicAware')}
-          ${tableRow('Engajamento (Cliques, CTR, Sessões)', payload.organic.engagement.weeks, 'onOrganicEng')}
-        </tbody>
-      </table>
-    </div>
-  `;
-}
-
-/* Paid */
-function renderPaid(payload){
-  const wrap = id('paidWrap');
-  const weeks = payload.weeks;
-  const makePaidTable = (label, key)=>{
-    const leads = payload.paid[key].leads.weeks;
-    const plan = payload.paid[key].leadsPlan.weeks;
-    const invest = payload.paid[key].invest.weeks;
-    const cpl = leads.map((v,i)=> num(v)>0 ? num(invest[i])/num(v) : 0);
-    const row = (title, arr, hook, format='num')=>`
-      <tr>
-        <td>${title}</td>
-        ${weeksLabels(weeks).map((_,i)=>`<td>${
-          format==='money'
-            ? `<input type="number" step="0.01" value="${num(arr[i])}" oninput="${hook}(this, ${i})" style="width:100%;background:#180f3a;border:1px solid var(--border);border-radius:8px;padding:6px;color:var(--text-1)">`
-            : `<input type="number" step="1" min="0" value="${num(arr[i])}" oninput="${hook}(this, ${i})" style="width:100%;background:#180f3a;border:1px solid var(--border);border-radius:8px;padding:6px;color:var(--text-1)">`
-        }</td>`).join('')}
-        <td class="muted"><b>${sum(arr)}</b></td>
-        <td></td>
-      </tr>`;
-    const cplRow = `
-      <tr>
-        <td><b>CPL</b></td>
-        ${cpl.map(v=>`<td class="muted">${v>0? currency(v): '-'}</td>`).join('')}
-        <td class="muted"><b>${sum(leads)>0 ? currency(sum(invest)/sum(leads)):'-'}</b></td>
-        <td></td>
-      </tr>`;
-    return `
-      <div class="card">
-        <h3>${label}</h3>
-        <table>${tableWeeklyHeader(weeks, [])}
+      <!-- PIPELINE COMERCIAL -->
+      <div class="section-title" style="margin-top:18px"><h2>Pipeline Comercial</h2><span class="note">Leads é preenchido automaticamente (orgânico + pago). CAC semanal e mensal.</span></div>
+      <div class="card col-12">
+        <table class="wk" id="tblPipe">
+          <thead>
+            <tr><th>Etapa</th><th>Semana 1</th><th>Semana 2</th><th>Semana 3</th><th>Semana 4</th><th>Semana 5</th><th>Total</th></tr>
+          </thead>
           <tbody>
-            ${row('Leads', leads, `onPaidLeads.bind(null,'${key}')`)}
-            ${row('Leads Plan', plan, `onPaidPlan.bind(null,'${key}')`)}
-            ${row('Valor investido (R$)', invest, `onPaidInvest.bind(null,'${key}')`, 'money')}
-            ${cplRow}
+            <tr data-m="leads"><td class="row-label">Leads (auto)</td>
+              <td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td class="total"></td></tr>
+            <tr data-m="oportunidades"><td class="row-label">Oportunidades</td>
+              <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+            <tr data-m="noShow"><td class="row-label">No Show</td>
+              <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+            <tr data-m="perdidos"><td class="row-label">Perdidos</td>
+              <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+            <tr data-m="vendas"><td class="row-label">Vendas</td>
+              <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td><td class="total"></td></tr>
+            <tr data-m="cpo"><td class="row-label">CPO (R$) <span class="note">Invest. total ÷ Oportunidades</span></td>
+              <td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td class="total"></td></tr>
+            <tr data-m="cac"><td class="row-label">CAC (R$) <span class="note">Invest. total ÷ Oportunidades</span></td>
+              <td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td class="total"></td></tr>
           </tbody>
         </table>
       </div>
-    `;
-  };
-  wrap.innerHTML = `
-    <div class="grid">
-      ${makePaidTable('Meta Ads','meta')}
-      ${makePaidTable('Google Ads','google')}
     </div>
-  `;
 
-  // totals awareness/engagement for paid
-  const wrap2 = id('paidMetaWrap');
-  const weeksArr = payload.weeks;
-  const totalInvestWeekly = Array.from({length:weeksArr},(_,i)=> num(payload.paid.meta.invest.weeks[i]) + num(payload.paid.google.invest.weeks[i]));
-  const totalLeadsWeekly = Array.from({length:weeksArr},(_,i)=> num(payload.paid.meta.leads.weeks[i]) + num(payload.paid.google.leads.weeks[i]));
-  wrap2.innerHTML = `
-    <div class="card">
-      <table>${tableWeeklyHeader(weeksArr)}
-        <tbody>
-          <tr>
-            <td><b>Total Leads (pago)</b></td>
-            ${totalLeadsWeekly.map(v=>`<td class="muted">${v}</td>`).join('')}
-            <td class="muted"><b>${sum(totalLeadsWeekly)}</b></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td><b>Total Investido (Meta + Google)</b></td>
-            ${totalInvestWeekly.map(v=>`<td class="muted">${currency(v)}</td>`).join('')}
-            <td class="muted"><b>${currency(sum(totalInvestWeekly))}</b></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td><b>CPL (pago)</b></td>
-            ${totalLeadsWeekly.map((v,i)=> v>0 ? `<td class="muted">${currency(totalInvestWeekly[i]/v)}</td>` : `<td class="muted">-</td>`).join('')}
-            <td class="muted"><b>${sum(totalLeadsWeekly)>0 ? currency(sum(totalInvestWeekly)/sum(totalLeadsWeekly)):'-'}</b></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td>Awareness (alcance + impressões)</td>
-            ${rowNumberInputs(weeksArr, payload.paid.awareness.weeks, 'onPaidAware')}
-            <td class="muted"><b>${sum(payload.paid.awareness.weeks)}</b></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td>Engajamento (Cliques, CTR, Sessões)</td>
-            ${rowNumberInputs(weeksArr, payload.paid.engagement.weeks, 'onPaidEng')}
-            <td class="muted"><b>${sum(payload.paid.engagement.weeks)}</b></td>
-            <td></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  `;
-}
+    <!-- ===================== REDES SOCIAIS ===================== -->
+    <div id="socialArea" style="display:none">
+      <div class="section-title"><h2>Redes Sociais</h2><span class="note">Adicione/exclua redes e métricas. Sem CPO/CPL aqui.</span></div>
 
-/* Pipeline */
-function renderPipeline(payload){
-  const wrap = id('pipelineWrap');
-  const weeks = payload.weeks;
-  const header = tableWeeklyHeader(weeks, []);
-  const row = (label, key)=>`
-    <tr>
-      <td>${label}</td>
-      ${rowNumberInputs(weeks, payload.pipeline[key].weeks, `onPipeline.bind(null,'${key}')`)}
-      <td class="muted"><b>${sum(payload.pipeline[key].weeks)}</b></td>
-      <td></td>
-    </tr>`;
-  const vendasTot = sum(payload.pipeline.vendas.weeks);
-  const investTot = sum(payload.paid.meta.invest.weeks) + sum(payload.paid.google.invest.weeks);
-  const cac = vendasTot>0 ? investTot / vendasTot : 0;
-
-  wrap.innerHTML = `
-    <div class="card">
-      <table>${header}
-        <tbody>
-          ${row('Agendamentos','agendamentos')}
-          ${row('Reuniões realizadas','reunioes')}
-          ${row('No show','noShow')}
-          ${row('Vendas','vendas')}
-          ${row('Perdidos','perdidos')}
-        </tbody>
-      </table>
-      <div class="inline" style="margin-top:10px">
-        <span class="pill">Investimento no mês: <b>${currency(investTot)}</b></span>
-        <span class="pill">Vendas no mês: <b>${vendasTot}</b></span>
-        <span class="pill">CAC: <b>${vendasTot>0?currency(cac):'-'}</b></span>
-      </div>
-    </div>
-  `;
-}
-
-/* KPIs */
-function renderKPIs(payload){
-  const leadsPaid = sum(payload.paid.meta.leads.weeks) + sum(payload.paid.google.leads.weeks);
-  const invest = sum(payload.paid.meta.invest.weeks) + sum(payload.paid.google.invest.weeks);
-  const cpl = leadsPaid>0 ? invest/leadsPaid : 0;
-
-  const vendas = sum(payload.pipeline.vendas.weeks);
-  const cac = vendas>0 ? invest/vendas : 0;
-
-  const leadsOrganic = sum(payload.organic.sources.flatMap(x=>x.weeks)) + 
-                       sum(payload.organic.site.flatMap(x=>x.weeks)) + 
-                       sum(payload.organic.lps.flatMap(x=>x.weeks));
-
-  const reunioes = sum(payload.pipeline.reunioes.weeks);
-  const agend = sum(payload.pipeline.agendamentos.weeks);
-  const showRate = agend>0 ? (reunioes/agend)*100 : 0;
-
-  id('kpiGrid').innerHTML = `
-    <div class="kpi"><small>Leads — Pago</small><b>${leadsPaid}</b><small class="muted">Meta + Google</small></div>
-    <div class="kpi"><small>Investimento</small><b>${currency(invest)}</b><small class="muted">Mês selecionado</small></div>
-    <div class="kpi"><small>CPL (pago)</small><b>${leadsPaid>0?currency(cpl):'-'}</b><small class="muted">Invest ÷ Leads</small></div>
-    <div class="kpi"><small>Leads — Orgânico</small><b>${leadsOrganic}</b><small class="muted">Somatório de origens</small></div>
-    <div class="kpi"><small>Vendas</small><b>${vendas}</b><small class="muted">Total no mês</small></div>
-    <div class="kpi"><small>CAC</small><b>${vendas>0?currency(cac):'-'}</b><small class="muted">Invest total ÷ Vendas</small></div>
-  `;
-}
-
-/* Redes Sociais */
-function renderSocials(payload){
-  const wrap = id('socialsWrap');
-  const weeks = payload.weeks;
-
-  const blocks = payload.socials.networks.map((net,idx)=>{
-    const metrics = Object.entries(net.metrics);
-    const rows = metrics.map(([label, obj])=>`
-      <tr>
-        <td>${label}</td>
-        ${rowNumberInputs(weeks, obj.weeks, `onSocialMetric.bind(null, ${idx}, '${label}')`)}
-        <td class="muted"><b>${sum(obj.weeks)}</b></td>
-        <td></td>
-      </tr>
-    `).join('');
-    return `
-      <div class="card">
-        <div class="inline" style="justify-content:space-between">
-          <h3 style="margin:0">${net.name}</h3>
-          <div class="inline">
-            <button class="btn" onclick="addMetric(${idx})">+ Métrica</button>
-            <button class="btn danger" onclick="removeNetwork(${idx})">Remover rede</button>
-          </div>
+      <div class="card col-12" style="margin-bottom:12px">
+        <div class="row" style="margin-bottom:8px">
+          <input id="newNetwork" class="input" placeholder="Nova rede (ex.: Instagram)"/>
+          <button id="btnAddNetwork" class="btn-sm">Adicionar rede</button>
         </div>
-        <table>${tableWeeklyHeader(weeks)}
-          <tbody>${rows}</tbody>
-        </table>
+        <div id="networkPills" class="row" style="margin-bottom:8px"></div>
+
+        <div class="row" style="margin-bottom:8px">
+          <input id="newMetric" class="input" placeholder="Nova métrica (ex.: Engajamentos)"/>
+          <button id="btnAddMetric" class="btn-sm">Adicionar métrica</button>
+        </div>
+        <div id="metricPills" class="row" style="margin-bottom:8px"></div>
       </div>
-    `;
-  }).join('');
-  wrap.innerHTML = blocks || `<div class="note">Nenhuma rede adicionada.</div>`;
-}
 
-/* =============== CHARTS =============== */
-let charts = {};
-function destroyCharts(){Object.values(charts).forEach(c=>c.destroy()); charts={};}
+      <div id="socialTables" class="grid"></div>
 
-function renderCharts(payload){
-  destroyCharts();
-  const n = payload.weeks;
-  const labels = weeksLabels(n);
+      <div class="section-title" style="margin-top:18px">
+        <h2>Dashboard — Social</h2>
+        <span class="mode">Semanal (5 semanas)</span>
+      </div>
+      <div class="card col-12">
+        <div class="row" style="margin-bottom:8px">
+          <select id="selNet" class="select"></select>
+          <select id="selMetric" class="select"></select>
+        </div>
+        <canvas id="chartSocial" height="120"></canvas>
+      </div>
+    </div>
 
-  const leadsOrgWeekly = Array.from({length:n},(_,i)=>
-    sum(payload.organic.sources.map(o=>num(o.weeks[i]))) +
-    sum(payload.organic.site.map(o=>num(o.weeks[i]))) +
-    sum(payload.organic.lps.map(o=>num(o.weeks[i])))
-  );
-  const leadsPaidWeekly = Array.from({length:n},(_,i)=>
-    num(payload.paid.meta.leads.weeks[i]) + num(payload.paid.google.leads.weeks[i])
-  );
-  const investWeekly = Array.from({length:n},(_,i)=>
-    num(payload.paid.meta.invest.weeks[i]) + num(payload.paid.google.invest.weeks[i])
-  );
-  const cplWeekly = labels.map((_,i)=> leadsPaidWeekly[i]>0 ? investWeekly[i]/leadsPaidWeekly[i] : 0);
-  const awWeekly = payload.paid.awareness.weeks.map(num);
-  const engWeekly = payload.paid.engagement.weeks.map(num);
+    <!-- ===================== DASHBOARDS (Franquias/White Label) ===================== -->
+    <div id="dashArea">
+      <div class="section-title" style="margin-top:18px">
+        <h2>Dashboards</h2>
+        <span class="mode">Semanal por padrão • Alterne para anual no topo</span>
+      </div>
 
-  charts.leads = new Chart(id('chartLeads'), {
-    type:'line',
-    data:{labels, datasets:[
-      {label:'Orgânico', data:leadsOrgWeekly},
-      {label:'Pago', data:leadsPaidWeekly},
-    ]},
-    options:{responsive:true, scales:{y:{beginAtZero:true}}}
-  });
+      <!-- Semanais -->
+      <div id="weeklyDash" class="grid">
+        <div class="card col-6">
+          <div class="row" style="justify-content:space-between">
+            <h3>Investimento semanal — Meta + Google</h3>
+            <select id="investView" class="select" title="Visão">
+              <option value="total">Total (Meta+Google)</option>
+              <option value="separado">Separado</option>
+              <option value="meta">Apenas Meta</option>
+              <option value="google">Apenas Google</option>
+            </select>
+          </div>
+          <canvas id="chartInvest" height="120"></canvas>
+          <div class="note">Soma exata dos inputs semanais (sanitização BR: 9.000 ⇒ 9000).</div>
+        </div>
 
-  charts.invest = new Chart(id('chartInvest'), {
-    type:'bar',
-    data:{labels, datasets:[{label:'Investimento (R$)', data:investWeekly}]},
-    options:{responsive:true, scales:{y:{beginAtZero:true}}}
-  });
+        <div class="card col-6">
+          <h3>CPL semanal (pago)</h3>
+          <canvas id="chartCPL" height="120"></canvas>
+          <div class="note">CPL = Investimento (Meta+Google) ÷ Leads (pago).</div>
+        </div>
 
-  charts.cpl = new Chart(id('chartCPL'), {
-    type:'line',
-    data:{labels, datasets:[{label:'CPL (R$)', data:cplWeekly}]},
-    options:{responsive:true, scales:{y:{beginAtZero:true}}}
-  });
+        <div class="card col-6">
+          <h3>CPO semanal</h3>
+          <canvas id="chartCPO" height="120"></canvas>
+          <div class="note">CPO = Investimento (Meta+Google) ÷ Oportunidades.</div>
+        </div>
 
-  // pizza orgânico por origem (total do mês)
-  const orgTotals = {};
-  [...payload.organic.sources, ...payload.organic.site, ...payload.organic.lps].forEach(o=>{
-    orgTotals[o.name]=(orgTotals[o.name]||0)+sum(o.weeks);
-  });
-  const pieLabels = Object.keys(orgTotals);
-  const pieData = Object.values(orgTotals);
-  charts.pie = new Chart(id('chartPieOrganic'), {
-    type:'pie',
-    data:{labels: pieLabels, datasets:[{data: pieData}]},
-    options:{responsive:true}
-  });
+        <div class="card col-6">
+          <h3>Lead × Oportunidade (semanal)</h3>
+          <canvas id="chartLeadOpp" height="120"></canvas>
+        </div>
 
-  charts.aweng = new Chart(id('chartAwEng'), {
-    type:'bar',
-    data:{labels, datasets:[
-      {label:'Awareness', data:awWeekly, stack:'a'},
-      {label:'Engajamento', data:engWeekly, stack:'a'},
-    ]},
-    options:{responsive:true, scales:{y:{beginAtZero:true}}}
-  });
-}
+        <div class="card col-12">
+          <div class="row" style="justify-content:space-between">
+            <h3>Leads Planejados × Conquistados (semanal)</h3>
+            <select id="leadPlanView" class="select">
+              <option value="ambos">Ambos os canais</option>
+              <option value="meta">Somente Meta</option>
+              <option value="google">Somente Google</option>
+            </select>
+          </div>
+          <canvas id="chartLeadPlan" height="120"></canvas>
+        </div>
 
-/* =============== HANDLERS =============== */
-// ORGÂNICO
-function onOrganicAdd(){
-  const p = ensureMonth(); p.organic.sources.push({name:"Nova origem", weeks:Array.from({length:p.weeks},()=>0)}); renderAll();
-}
-function onOrganicRemove(idx){const p=ensureMonth(); p.organic.sources.splice(idx,1); renderAll();}
-function onOrganicName(el, idx){const p=ensureMonth(); p.organic.sources[idx].name = el.value;}
-function onOrganicWeek(idx, el, w){const p=ensureMonth(); p.organic.sources[idx].weeks[w] = num(el.value); renderAll();}
+        <div class="card col-12">
+          <h3>Awareness & Engajamento — Totais Semanais (pago)</h3>
+          <canvas id="chartAware" height="120"></canvas>
+          <div class="note">Alcance, Impressões, Cliques, Sessões (Meta+Google). CTR em eixo secundário.</div>
+        </div>
+      </div>
 
-function onSiteAdd(){const p=ensureMonth(); p.organic.site.push({name:"novo-site", weeks:Array.from({length:p.weeks},()=>0)}); renderAll();}
-function onSiteRemove(i){const p=ensureMonth(); p.organic.site.splice(i,1); renderAll();}
-function onSiteName(el,i){const p=ensureMonth(); p.organic.site[i].name = el.value;}
-function onSiteWeek(i,el,w){const p=ensureMonth(); p.organic.site[i].weeks[w]=num(el.value); renderAll();}
+      <!-- Anual -->
+      <div id="annualDash" style="display:none">
+        <div class="card col-12">
+          <h3>Evolução anual: Awareness (Alcance) → Cliques → Leads → Oportunidade → Vendas</h3>
+          <canvas id="chartAnnual" height="140"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
 
-function onLpAdd(){const p=ensureMonth(); p.organic.lps.push({name:"nova-lp", weeks:Array.from({length:p.weeks},()=>0)}); renderAll();}
-function onLpRemove(i){const p=ensureMonth(); p.organic.lps.splice(i,1); renderAll();}
-function onLpName(el,i){const p=ensureMonth(); p.organic.lps[i].name = el.value;}
-function onLpWeek(i,el,w){const p=ensureMonth(); p.organic.lps[i].weeks[w]=num(el.value); renderAll();}
+  <input id="fileInput" type="file" accept="application/json" style="display:none"/>
 
-function onOrganicAware(el,i){const p=ensureMonth(); p.organic.awareness.weeks[i]=num(el.value); renderAll();}
-function onOrganicEng(el,i){const p=ensureMonth(); p.organic.engagement.weeks[i]=num(el.value); renderAll();}
+  <script>
+    /* ========================= UTIL ========================= */
+    const YEARS=[2025,2026,2027,2028,2029,2030];
+    const MONTHS=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+    const SEGMENTS=["Franquias","White Label","Redes Sociais"];
+    const zeros5=()=>[0,0,0,0,0];
+    const $=s=>document.querySelector(s);
+    const $$=s=>Array.from(document.querySelectorAll(s));
+    const sum=arr=>arr.reduce((a,b)=>a+num(b),0);
+    const fmtR=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    const weekLabels=()=>["W1","W2","W3","W4","W5"];
+    const calcCTR=(c,imp)=>imp>0?(c/imp)*100:0;
 
-// PAGO
-function onPaidLeads(key, el, i){const p=ensureMonth(); p.paid[key].leads.weeks[i]=num(el.value); renderAll();}
-function onPaidPlan(key, el, i){const p=ensureMonth(); p.paid[key].leadsPlan.weeks[i]=num(el.value); renderAll();}
-function onPaidInvest(key, el, i){const p=ensureMonth(); p.paid[key].invest.weeks[i]=Number(el.value||0); renderAll();}
-function onPaidAware(el,i){const p=ensureMonth(); p.paid.awareness.weeks[i]=num(el.value); renderAll();}
-function onPaidEng(el,i){const p=ensureMonth(); p.paid.engagement.weeks[i]=num(el.value); renderAll();}
-
-// PIPELINE
-function onPipeline(key, el, i){const p=ensureMonth(); p.pipeline[key].weeks[i]=num(el.value); renderAll();}
-
-// SOCIALS
-function addMetric(netIdx){
-  const p=ensureMonth();
-  const name = prompt("Nome da métrica (ex.: visitas, likes, comentários, compartilhamentos):");
-  if(!name) return;
-  p.socials.networks[netIdx].metrics[name] = {weeks:Array.from({length:p.weeks},()=>0)};
-  renderAll();
-}
-function onSocialMetric(netIdx, metric, el, i){const p=ensureMonth(); p.socials.networks[netIdx].metrics[metric].weeks[i]=num(el.value); renderAll();}
-function removeNetwork(idx){const p=ensureMonth(); p.socials.networks.splice(idx,1); renderAll();}
-id('addSocial').onclick = ()=>{
-  const p=ensureMonth();
-  const name = prompt("Nome da rede (ex.: Instagram, LinkedIn, YouTube)");
-  if(!name) return;
-  p.socials.networks.push({name, metrics:{
-    visitas:{weeks:Array.from({length:p.weeks},()=>0)},
-    likes:{weeks:Array.from({length:p.weeks},()=>0)},
-    comentarios:{weeks:Array.from({length:p.weeks},()=>0)},
-    compartilhamentos:{weeks:Array.from({length:p.weeks},()=>0)},
-  }});
-  renderAll();
-};
-
-// Botões “Adicionar”
-id('addOrganicSource').onclick = onOrganicAdd;
-id('addSiteSub').onclick = onSiteAdd;
-id('addLpSub').onclick = onLpAdd;
-
-/* =============== CONTROLES SUPERIORES =============== */
-(function initSelectors(){
-  // ano
-  const ySel = id('year');
-  for(let y=YEAR_NOW-1; y<=YEAR_NOW+2; y++){
-    const opt = document.createElement('option');
-    opt.value = y; opt.textContent = y;
-    if(y===state.year) opt.selected = true;
-    ySel.appendChild(opt);
-  }
-  // mês
-  const mSel = id('month');
-  MONTHS.forEach((m,i)=>{
-    const opt = document.createElement('option');
-    opt.value = i; opt.textContent = m;
-    if(i===state.month) opt.selected = true;
-    mSel.appendChild(opt);
-  });
-})();
-id('segment').onchange = (e)=>{state.segment=e.target.value; ensureMonth(); renderAll(); saveLocal();}
-id('year').onchange = (e)=>{state.year=Number(e.target.value); ensureMonth(); renderAll(); saveLocal();}
-id('month').onchange = (e)=>{state.month=Number(e.target.value); ensureMonth(); renderAll(); saveLocal();}
-id('weeks').oninput = (e)=>{state.weeks=Math.max(1, Math.min(6, Number(e.target.value||4))); ensureMonth(); renderAll(); saveLocal();}
-
-/* =============== TABS =============== */
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    btn.classList.add('active');
-    id(btn.dataset.tab).classList.add('active');
-    if(btn.dataset.tab==='dashboard') renderCharts(ensureMonth());
-  });
-});
-
-/* =============== SALVAR/IMPORTAR/EXPORTAR =============== */
-const STORAGE_KEY = 'camerite_performance_v1';
-function saveLocal(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-function loadLocal(){
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if(!raw) return;
-  try{
-    const parsed = JSON.parse(raw);
-    // migração simples
-    Object.assign(state, parsed);
-  }catch(e){}
-}
-id('saveBtn').onclick = ()=>{saveLocal(); alert('Dados salvos no navegador.');}
-id('exportBtn').onclick = ()=>{
-  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `camerite-${state.segment}-${state.year}-${state.month+1}.json`;
-  a.click();
-};
-id('importBtn').onclick = ()=> id('fileInput').click();
-id('fileInput').addEventListener('change', (e)=>{
-  const file = e.target.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{ 
-    try{
-      const parsed = JSON.parse(reader.result);
-      Object.assign(state, parsed);
-      // atualizar selects
-      id('segment').value = state.segment;
-      id('year').value = state.year;
-      id('month').value = state.month;
-      id('weeks').value = state.weeks;
-      renderAll(); saveLocal();
-      alert('Importado com sucesso!');
-    }catch(err){
-      alert('Arquivo inválido.');
+    // sanitiza valor BR: "9.000,50" => 9000.50 | "9.000" => 9000
+    function parseBRNumber(text){
+      if (text == null) return 0;
+      let s = (""+text).replace(/[^\d.,-]/g,''); // keep digits , . -
+      // remove milhares
+      s = s.replace(/\.(?=\d{3}(\D|$))/g,'');
+      // vírgula decimal -> ponto
+      s = s.replace(',', '.');
+      const v = parseFloat(s);
+      return isNaN(v)?0:v;
     }
-  };
-  reader.readAsText(file);
-});
+    const num=parseBRNumber;
 
-/* =============== LIMPAR MÊS =============== */
-id('clearMonth').onclick = ()=>{
-  if(!confirm('Tem certeza que deseja limpar os dados deste mês?')) return;
-  const {segment,year,month} = state;
-  if(state.data?.[segment]?.[year]) delete state.data[segment][year][month];
-  ensureMonth(); renderAll(); saveLocal();
-};
+    /* ========================= ESTADO ======================= */
+    function defaultFWMonth(){
+      return{
+        weeks:5,
+        organic:{
+          sources:{ "Google":zeros5(), "Bing":zeros5(), "Site":zeros5() }, // leads por semana
+          landing:{ "LP Principal":zeros5() }
+        },
+        paid:{
+          meta:{ investimento:zeros5(), alcance:zeros5(), impressoes:zeros5(), cliques:zeros5(), sessoes:zeros5(), leadsPlan:zeros5(), leads:zeros5() },
+          google:{ investimento:zeros5(), alcance:zeros5(), impressoes:zeros5(), cliques:zeros5(), sessoes:zeros5(), leadsPlan:zeros5(), leads:zeros5() }
+        },
+        pipe:{ leads:zeros5(), oportunidades:zeros5(), noShow:zeros5(), perdidos:zeros5(), vendas:zeros5(), cpo:zeros5(), cac:zeros5() }
+      }
+    }
+    function defaultSocialMonth(){
+      return{
+        weeks:5,
+        metrics:["Alcance","Impressões","Cliques","Sessões"],
+        networks:{
+          "Instagram":{ "Alcance":zeros5(),"Impressões":zeros5(),"Cliques":zeros5(),"Sessões":zeros5() },
+          "Facebook":{ "Alcance":zeros5(),"Impressões":zeros5(),"Cliques":zeros5(),"Sessões":zeros5() }
+        }
+      }
+    }
 
-/* =============== START =============== */
-loadLocal();
-ensureMonth();
-renderAll();
-</script>
+    const STATE={
+      year:YEARS[0],
+      month:0,
+      segment:"Franquias",
+      mode:"weekly",
+      data:{
+        "Franquias": Object.fromEntries(YEARS.map(y=>[y,Array.from({length:12},defaultFWMonth)])),
+        "White Label": Object.fromEntries(YEARS.map(y=>[y,Array.from({length:12},defaultFWMonth)])),
+        "Redes Sociais": Object.fromEntries(YEARS.map(y=>[y,Array.from({length:12},defaultSocialMonth)]))
+      }
+    };
+
+    function curData(){ return STATE.data[STATE.segment][STATE.year][STATE.month]; }
+    function monthEnabled(){ return curData().weeks!==0; }
+
+    /* ========================= INIT: mês atual ======================= */
+    (function initCurrentYearMonth(){
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = now.getMonth(); // 0..11
+      if (YEARS.includes(y)) {
+        STATE.year = y;
+        $("#yearSelect").value = String(y);
+      }
+      STATE.month = m;
+      $("#monthSelect").value = String(m);
+    })();
+
+    /* ========================= SEGMENTOS ====================== */
+    $("#segTabs").addEventListener('click',e=>{
+      const t=e.target.closest('.seg-tab'); if(!t) return;
+      $$(".seg-tab").forEach(x=>x.classList.remove('active')); t.classList.add('active');
+      STATE.segment=t.dataset.seg;
+      toggleAreas();
+      renderAll();
+    });
+
+    function toggleAreas(){
+      const social=STATE.segment==="Redes Sociais";
+      $("#fwArea").style.display = social?"none":"";
+      $("#dashArea").style.display = social?"none":"";   // dashboards só para F/W
+      $("#kpiBar").style.display = social?"none":"";
+      $("#socialArea").style.display = social?"":"none";
+    }
+
+    /* ========================= ORGÂNICO (F/W) ================= */
+    function table5(id,label){
+      let t = `<table class="wk" data-bind="${id}">
+        <thead><tr><th>${label}</th><th>W1</th><th>W2</th><th>W3</th><th>W4</th><th>W5</th><th>Total</th></tr></thead>
+        <tbody><tr>`;
+      t+=`<td class="row-label">Leads</td>`;
+      for(let i=0;i<5;i++){ t+=`<td><input class="num" data-w="${i}"/></td>`; }
+      t+=`<td class="total"></td></tr></tbody></table>`;
+      return t;
+    }
+    function updateRowTotal(tbl){
+      const inputs=[...tbl.querySelectorAll("input.num[data-w]")];
+      const vals=inputs.map(i=>num(i.value));
+      const total=tbl.querySelector(".total");
+      total.textContent=sum(vals).toLocaleString('pt-BR');
+    }
+
+    function renderOrganic(){
+      const m=curData(); if(!m) return;
+      // Origens
+      const list=$("#orgSourceList"); list.innerHTML="";
+      const tables=$("#orgSourceTables"); tables.innerHTML="";
+      Object.keys(m.organic.sources).forEach(src=>{
+        const pill=document.createElement('div');
+        pill.className="pill"; pill.innerHTML=`<span>${src}</span><span class="x" title="Remover" data-src="${src}">×</span>`;
+        list.appendChild(pill);
+
+        const wrap=document.createElement('div');
+        wrap.style.marginTop="8px";
+        wrap.innerHTML=table5(`org-src-${src}`,"Leads — "+src);
+        tables.appendChild(wrap);
+
+        const tbl=wrap.querySelector("table");
+        // preencher
+        const arr=m.organic.sources[src];
+        [...tbl.querySelectorAll("input.num[data-w]")].forEach(inp=>{
+          const i=+inp.dataset.w;
+          inp.value=arr[i]??0;
+        });
+        updateRowTotal(tbl);
+      });
+      list.onclick=e=>{
+        const x=e.target.closest('.x'); if(!x) return;
+        delete m.organic.sources[x.dataset.src];
+        renderOrganic(); renderPipe(); renderChartsAndKpis();
+      };
+      $("#btnAddSource").onclick=()=>{
+        const name=$("#orgNewSource").value.trim(); if(!name) return;
+        if(!m.organic.sources[name]) m.organic.sources[name]=zeros5();
+        $("#orgNewSource").value="";
+        renderOrganic(); renderPipe(); renderChartsAndKpis();
+      };
+
+      // LPs
+      const lpList=$("#lpList"); lpList.innerHTML="";
+      const lpTables=$("#lpTables"); lpTables.innerHTML="";
+      Object.keys(m.organic.landing).forEach(lp=>{
+        const pill=document.createElement('div');
+        pill.className="pill"; pill.innerHTML=`<span>${lp}</span><span class="x" title="Remover" data-lp="${lp}">×</span>`;
+        lpList.appendChild(pill);
+
+        const wrap=document.createElement('div');
+        wrap.style.marginTop="8px";
+        wrap.innerHTML=table5(`org-lp-${lp}`,"Leads — "+lp);
+        lpTables.appendChild(wrap);
+
+        const tbl=wrap.querySelector("table");
+        const arr=m.organic.landing[lp];
+        [...tbl.querySelectorAll("input.num[data-w]")].forEach(inp=>{
+          const i=+inp.dataset.w;
+          inp.value=arr[i]??0;
+        });
+        updateRowTotal(tbl);
+      });
+      lpList.onclick=e=>{
+        const x=e.target.closest('.x'); if(!x) return;
+        delete m.organic.landing[x.dataset.lp];
+        renderOrganic(); renderPipe(); renderChartsAndKpis();
+      };
+      $("#btnAddLP").onclick=()=>{
+        const name=$("#lpNew").value.trim(); if(!name) return;
+        if(!m.organic.landing[name]) m.organic.landing[name]=zeros5();
+        $("#lpNew").value="";
+        renderOrganic(); renderPipe(); renderChartsAndKpis();
+      };
+
+      // Delegação de input (corrige perder foco / rebind por mês)
+      $("#orgSourceTables").oninput = e=>{
+        const inp=e.target.closest("input.num[data-w]"); if(!inp) return;
+        const tbl=inp.closest("table"); const id=tbl.dataset.bind; const i=+inp.dataset.w;
+        const v=num(inp.value);
+        const mth=curData();
+        if(id.startsWith("org-src-")){
+          const key=id.replace("org-src-","");
+          if(!mth.organic.sources[key]) mth.organic.sources[key]=zeros5();
+          mth.organic.sources[key][i]=v;
+        }else{
+          const key=id.replace("org-lp-","");
+          if(!mth.organic.landing[key]) mth.organic.landing[key]=zeros5();
+          mth.organic.landing[key][i]=v;
+        }
+        updateRowTotal(tbl);
+        renderPipe(); renderChartsAndKpis(false);
+      };
+      $("#lpTables").oninput = $("#orgSourceTables").oninput;
+    }
+
+    /* ========================= PAGO (F/W) ===================== */
+    function fillPaidTable(tbl,obj){
+      // preencher valores e totais
+      tbl.querySelectorAll("tbody tr").forEach(tr=>{
+        const metric=tr.dataset.m;
+        const inputs=[...tr.querySelectorAll("input.num")];
+        if(metric==="ctr"){
+          for(let i=0;i<5;i++){
+            const c=num(obj.cliques[i]); const im=num(obj.impressoes[i]);
+            inputs[i].value=calcCTR(c,im).toFixed(2);
+          }
+          tr.querySelector(".total").textContent=(Array.from({length:5},(_,i)=>calcCTR(num(obj.cliques[i]),num(obj.impressoes[i]))).reduce((a,b)=>a+b,0)/5).toFixed(2)+" %";
+        }else{
+          inputs.forEach((inp,i)=> inp.value = obj[metric][i] ?? 0 );
+          tr.querySelector(".total").textContent=sum(obj[metric]).toLocaleString('pt-BR');
+        }
+      });
+    }
+    function renderPaid(){
+      const m=curData();
+      fillPaidTable($("#tblMeta"), m.paid.meta);
+      fillPaidTable($("#tblGoogle"), m.paid.google);
+    }
+
+    // Delegação de input para tabelas pagas (funciona em qualquer mês)
+    ["#tblMeta","#tblGoogle"].forEach(sel=>{
+      const tbl = $(sel);
+      tbl.addEventListener('input', e=>{
+        const inp=e.target.closest("input.num"); if(!inp) return;
+        const tr=inp.closest("tr"); const metric=tr.dataset.m;
+        if(metric==="ctr") return; // calculado
+        const i = inp.dataset.w ? +inp.dataset.w : Array.from(inp.parentElement.parentElement.children).indexOf(inp.parentElement)-1;
+        const v = num(inp.value);
+        const mth=curData();
+        const obj = (sel==="#tblMeta") ? mth.paid.meta : mth.paid.google;
+        obj[metric][i] = v;
+        // atualizar CTR e totais
+        fillPaidTable(tbl, obj);
+        renderPipe(); renderChartsAndKpis();
+      });
+    });
+
+    /* ========================= PIPELINE (F/W) ================= */
+    function computeAutoLeads(m){
+      const orgW=[0,0,0,0,0];
+      Object.values(m.organic.sources).forEach(a=>a.forEach((v,i)=>orgW[i]+=num(v)));
+      Object.values(m.organic.landing).forEach(a=>a.forEach((v,i)=>orgW[i]+=num(v)));
+      const paidW=[0,0,0,0,0];
+      for(let i=0;i<5;i++) paidW[i]=num(m.paid.meta.leads[i])+num(m.paid.google.leads[i]);
+      return orgW.map((v,i)=>v+paidW[i]);
+    }
+    function recomputePipeDerived(m){
+      m.pipe.leads = computeAutoLeads(m);
+      const invW=[0,0,0,0,0];
+      for(let i=0;i<5;i++) invW[i]=num(m.paid.meta.investimento[i])+num(m.paid.google.investimento[i]);
+      for(let i=0;i<5;i++){
+        const opp=num(m.pipe.oportunidades[i]);
+        const c=(opp>0)? invW[i]/opp : 0;
+        m.pipe.cpo[i]=c; m.pipe.cac[i]=c;
+      }
+    }
+    function fillPipeTable(){
+      const m=curData();
+      recomputePipeDerived(m);
+      const tbl=$("#tblPipe");
+      tbl.querySelectorAll("tbody tr").forEach(tr=>{
+        const k=tr.dataset.m;
+        const inputs=[...tr.querySelectorAll("input.num")];
+        const arr=m.pipe[k];
+        inputs.forEach((inp,i)=>{
+          inp.value = (k==="leads"||k==="cpo"||k==="cac") ? (k==="leads"? arr[i] : (arr[i]??0).toFixed(2)) : (arr[i]??0);
+        });
+        tr.querySelector(".total").textContent=(k==="cpo"||k==="cac")? (sum(arr)/5).toFixed(2) : sum(arr).toLocaleString('pt-BR');
+      });
+    }
+    $("#tblPipe").addEventListener('input', e=>{
+      const inp=e.target.closest("input.num[data-w]"); if(!inp) return;
+      const m=curData();
+      const tr=inp.closest("tr"); const k=tr.dataset.m; if(["leads","cpo","cac"].includes(k)) return;
+      const i=+inp.dataset.w; m.pipe[k][i]=num(inp.value);
+      fillPipeTable(); renderChartsAndKpis();
+    });
+
+    /* ========================= SOCIAL ========================= */
+    function renderSocial(){
+      const s=curData(); // social month
+      // redes (pills)
+      const pills=$("#networkPills"); pills.innerHTML="";
+      Object.keys(s.networks).forEach(n=>{
+        const pill=document.createElement('div');
+        pill.className="pill"; pill.innerHTML=`<span>${n}</span><span class="x" data-net="${n}">×</span>`;
+        pills.appendChild(pill);
+      });
+      pills.onclick=e=>{
+        const x=e.target.closest('.x'); if(!x) return;
+        delete s.networks[x.dataset.net];
+        renderSocialTables();
+        renderSocialSelectors();
+        renderSocialChart();
+      };
+      $("#btnAddNetwork").onclick=()=>{
+        const name=$("#newNetwork").value.trim(); if(!name) return;
+        if(!s.networks[name]) s.networks[name]=Object.fromEntries(s.metrics.map(mm=>[mm,zeros5()]));
+        $("#newNetwork").value="";
+        renderSocialTables(); renderSocialSelectors(); renderSocialChart();
+      };
+
+      // métricas (pills c/ remover)
+      renderMetricPills();
+      $("#btnAddMetric").onclick=()=>{
+        const mname=$("#newMetric").value.trim(); if(!mname) return;
+        if(!s.metrics.includes(mname)){
+          s.metrics.push(mname);
+          Object.values(s.networks).forEach(obj=> obj[mname]=zeros5());
+        }
+        $("#newMetric").value="";
+        renderMetricPills(); renderSocialTables(); renderSocialSelectors(); renderSocialChart();
+      };
+
+      renderSocialTables();
+      renderSocialSelectors();
+      renderSocialChart();
+    }
+    function renderMetricPills(){
+      const s=curData();
+      const holder=$("#metricPills"); holder.innerHTML="";
+      s.metrics.forEach(mm=>{
+        const pill=document.createElement('div');
+        pill.className="pill"; pill.innerHTML=`<span>${mm}</span><span class="x" data-m="${mm}">×</span>`;
+        holder.appendChild(pill);
+      });
+      holder.onclick=e=>{
+        const x=e.target.closest('.x'); if(!x) return;
+        const rm=x.dataset.m;
+        // remover métrica (sem permitir remover CTR que é derivado)
+        if(["CTR","CTR (%)"].includes(rm)) return;
+        s.metrics = s.metrics.filter(m=>m!==rm);
+        Object.values(s.networks).forEach(obj=>{ delete obj[rm]; });
+        renderMetricPills(); renderSocialTables(); renderSocialSelectors(); renderSocialChart();
+      };
+    }
+    function renderSocialTables(){
+      const s=curData();
+      const wrap=$("#socialTables"); wrap.innerHTML="";
+      Object.keys(s.networks).forEach(net=>{
+        const card=document.createElement('div'); card.className="card col-6";
+        const rows=s.metrics.map(mm=>`
+          <tr data-mm="${mm}">
+            <td class="row-label">${mm}</td>
+            <td><input class="num" data-w="0"/></td><td><input class="num" data-w="1"/></td><td><input class="num" data-w="2"/></td><td><input class="num" data-w="3"/></td><td><input class="num" data-w="4"/></td>
+            <td class="total"></td>
+          </tr>`).join('')
+          + (s.metrics.includes("Cliques") && s.metrics.includes("Impressões") ? `
+          <tr data-mm="CTR">
+            <td class="row-label">CTR (%)</td>
+            <td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td><td><input class="num" readonly/></td>
+            <td class="total"></td>
+          </tr>` : ``);
+        card.innerHTML=`<h3>${net}</h3>
+          <table class="wk" data-net="${net}">
+            <thead><tr><th>Métrica</th><th>W1</th><th>W2</th><th>W3</th><th>W4</th><th>W5</th><th>Total</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+        wrap.appendChild(card);
+
+        // preencher valores
+        const tbl=card.querySelector("table");
+        s.metrics.forEach(mm=>{
+          const tr=[...tbl.tBodies[0].rows].find(r=>r.dataset.mm===mm);
+          if(!tr) return;
+          [...tr.querySelectorAll("input.num[data-w]")].forEach(inp=>{
+            const i=+inp.dataset.w; inp.value = s.networks[net][mm][i] ?? 0;
+          });
+          tr.querySelector(".total").textContent = sum(s.networks[net][mm]).toLocaleString('pt-BR');
+        });
+        // CTR preenchido
+        if (s.metrics.includes("Cliques") && s.metrics.includes("Impressões")) {
+          const ctrTr=[...tbl.tBodies[0].rows].find(r=>r.dataset.mm==="CTR");
+          if (ctrTr){
+            const ctrArr=Array.from({length:5},(_,i)=>calcCTR(num(s.networks[net]["Cliques"][i]||0), num(s.networks[net]["Impressões"][i]||0)));
+            [...ctrTr.querySelectorAll("input")].forEach((inp,i)=> inp.value = ctrArr[i].toFixed(2));
+            ctrTr.querySelector(".total").textContent=(sum(ctrArr)/5).toFixed(2)+" %";
+          }
+        }
+      });
+
+      // Delegação de input — NÃO re-renderiza a tabela (mantém foco)
+      $("#socialTables").oninput = e=>{
+        const inp=e.target.closest("input.num[data-w]");
+        if(!inp) return;
+        const tbl=inp.closest("table"); const net=tbl.dataset.net;
+        const tr=inp.closest("tr"); const mm=tr.dataset.mm;
+        if(mm==="CTR") return; // derivado
+        const i=+inp.dataset.w; const v=num(inp.value);
+        const s=curData();
+        s.networks[net][mm][i]=v;
+
+        // atualizar total da linha
+        tr.querySelector(".total").textContent = sum(s.networks[net][mm]).toLocaleString('pt-BR');
+
+        // atualizar CTR se necessário
+        if ((mm==="Cliques" || mm==="Impressões") && s.metrics.includes("Cliques") && s.metrics.includes("Impressões")){
+          const ctrTr=[...tbl.tBodies[0].rows].find(r=>r.dataset.mm==="CTR");
+          if(ctrTr){
+            const ctrArr=Array.from({length:5},(_,k)=>calcCTR(num(s.networks[net]["Cliques"][k]||0), num(s.networks[net]["Impressões"][k]||0)));
+            [...ctrTr.querySelectorAll("input")].forEach((inp2,k)=> inp2.value = ctrArr[k].toFixed(2));
+            ctrTr.querySelector(".total").textContent=(sum(ctrArr)/5).toFixed(2)+" %";
+          }
+        }
+        renderSocialChart(); // atualiza gráfico sem perder foco
+      };
+    }
+    function renderSocialSelectors(){
+      const s=curData();
+      const selNet=$("#selNet"), selMetric=$("#selMetric");
+      selNet.innerHTML=Object.keys(s.networks).map(n=>`<option>${n}</option>`).join('');
+      selMetric.innerHTML=s.metrics.map(mm=>`<option>${mm}</option>`).join('');
+      if (!selNet.value && Object.keys(s.networks).length) selNet.value = Object.keys(s.networks)[0];
+      if (!selMetric.value && s.metrics.length) selMetric.value = s.metrics[0];
+      selNet.onchange=renderSocialChart; selMetric.onchange=renderSocialChart;
+    }
+
+    /* ========================= DASH/CHARTS ==================== */
+    let chartInvest, chartCPL, chartCPO, chartLeadOpp, chartAware, chartAnnual, chartLeadPlan, chartSocial;
+    function makeOrUpdate(ref, canvas, type, data, options){
+      if(ref && ref instanceof Chart){ ref.data=data; ref.options=options||{}; ref.update(); return ref; }
+      return new Chart(canvas, {type, data, options});
+    }
+
+    function renderChartsAndKpis(updateAnnualToo=true){
+      if(STATE.segment==="Redes Sociais"){ return; }
+      const m=curData();
+
+      // KPI bar
+      const investWeekly=Array.from({length:5},(_,i)=> num(m.paid.meta.investimento[i]) + num(m.paid.google.investimento[i]) );
+      const investMonth=sum(investWeekly);
+      const leadsMonth=sum(computeAutoLeads(m));
+      const oppMonth=sum(m.pipe.oportunidades);
+      const salesMonth=sum(m.pipe.vendas);
+      const cacMonth = oppMonth>0 ? investMonth/oppMonth : 0;
+      $("#kpiInvest").textContent=fmtR(investMonth);
+      $("#kpiLeads").textContent=leadsMonth.toLocaleString('pt-BR');
+      $("#kpiOpp").textContent=oppMonth.toLocaleString('pt-BR');
+      $("#kpiSales").textContent=salesMonth.toLocaleString('pt-BR');
+      $("#kpiCAC").textContent=fmtR(cacMonth);
+
+      // Dados p/ gráficos semanais
+      const meta=m.paid.meta, goo=m.paid.google;
+      const leadsPago=Array.from({length:5},(_,i)=>num(meta.leads[i])+num(goo.leads[i]));
+      const oportunidades=m.pipe.oportunidades;
+      const CPL=investWeekly.map((inv,i)=> (leadsPago[i]>0)? inv/leadsPago[i]:0);
+      const CPO=investWeekly.map((inv,i)=> (num(oportunidades[i])>0)? inv/num(oportunidades[i]):0);
+
+      const paidClick=Array.from({length:5},(_,i)=>num(meta.cliques[i])+num(goo.cliques[i]));
+      const paidImpr=Array.from({length:5},(_,i)=>num(meta.impressoes[i])+num(goo.impressoes[i]));
+      const paidReach=Array.from({length:5},(_,i)=>num(meta.alcance[i])+num(goo.alcance[i]));
+      const paidSess=Array.from({length:5},(_,i)=>num(meta.sessoes[i])+num(goo.sessoes[i]));
+      const paidCTR=paidClick.map((c,i)=>calcCTR(c,paidImpr[i]));
+
+      // Investimento: visões
+      const view=$("#investView").value;
+      let investDataSets=[];
+      if(view==="total"){
+        investDataSets=[{label:"Investimento (Meta+Google)", data:investWeekly, borderWidth:1}];
+      }else if(view==="separado"){
+        investDataSets=[
+          {label:"Meta", data:meta.investimento, borderWidth:1},
+          {label:"Google", data:goo.investimento, borderWidth:1}
+        ];
+      }else if(view==="meta"){
+        investDataSets=[{label:"Meta", data:meta.investimento, borderWidth:1}];
+      }else{
+        investDataSets=[{label:"Google", data:goo.investimento, borderWidth:1}];
+      }
+
+      chartInvest = makeOrUpdate(chartInvest, $("#chartInvest"), 'bar', {labels:weekLabels(), datasets:investDataSets}, {responsive:true, scales:{y:{beginAtZero:true}}});
+      chartCPL    = makeOrUpdate(chartCPL, $("#chartCPL"), 'line', {labels:weekLabels(), datasets:[{label:"CPL (R$)", data:CPL, tension:.25}]}, {responsive:true, scales:{y:{beginAtZero:true}}});
+      chartCPO    = makeOrUpdate(chartCPO, $("#chartCPO"), 'line', {labels:weekLabels(), datasets:[{label:"CPO (R$)", data:CPO, tension:.25}]}, {responsive:true, scales:{y:{beginAtZero:true}}});
+      chartLeadOpp= makeOrUpdate(chartLeadOpp, $("#chartLeadOpp"), 'scatter', {datasets:[{label:"Semanas", data:Array.from({length:5},(_,i)=>({x:num(m.pipe.leads[i]), y:num(oportunidades[i])})), pointRadius:5}]},{responsive:true, scales:{x:{title:{display:true,text:"Leads"},beginAtZero:true}, y:{title:{display:true,text:"Oportunidades"},beginAtZero:true}}});
+      chartAware  = makeOrUpdate(chartAware, $("#chartAware"), 'line', {labels:weekLabels(), datasets:[
+        {label:"Alcance (pago)", data:paidReach, tension:.25},
+        {label:"Impressões (pago)", data:paidImpr, tension:.25},
+        {label:"Cliques (pago)", data:paidClick, tension:.25},
+        {label:"Sessões (pago)", data:paidSess, tension:.25},
+        {label:"CTR (%)", data:paidCTR, tension:.25, yAxisID:'y1'}
+      ]},{responsive:true, scales:{y:{beginAtZero:true}, y1:{position:'right', beginAtZero:true}}});
+
+      // Leads Planejados x Conquistados
+      const mode=$("#leadPlanView").value;
+      let ds=[];
+      if(mode==="ambos"){
+        ds=[
+          {label:"Meta — Planejado", data:meta.leadsPlan, tension:.25},
+          {label:"Meta — Conquistado", data:meta.leads, tension:.25},
+          {label:"Google — Planejado", data:goo.leadsPlan, tension:.25},
+          {label:"Google — Conquistado", data:goo.leads, tension:.25},
+        ];
+      }else if(mode==="meta"){
+        ds=[
+          {label:"Meta — Planejado", data:meta.leadsPlan, tension:.25},
+          {label:"Meta — Conquistado", data:meta.leads, tension:.25},
+        ];
+      }else{
+        ds=[
+          {label:"Google — Planejado", data:goo.leadsPlan, tension:.25},
+          {label:"Google — Conquistado", data:goo.leads, tension:.25},
+        ];
+      }
+      chartLeadPlan = makeOrUpdate(chartLeadPlan, $("#chartLeadPlan"), 'line', {labels:weekLabels(), datasets:ds}, {responsive:true, scales:{y:{beginAtZero:true}}});
+
+      if(updateAnnualToo) renderAnnual();
+    }
+
+    function renderAnnual(){
+      if(STATE.mode!=="annual"){ $("#weeklyDash").style.display=""; $("#annualDash").style.display="none"; return; }
+      $("#weeklyDash").style.display="none"; $("#annualDash").style.display="";
+      const months=STATE.data[STATE.segment][STATE.year];
+
+      // Recalcular a partir dos inputs (independente do pipeline salvo)
+      const alc=months.map(m => sum(m.paid.meta.alcance.map((v,i)=> num(v)+num(m.paid.google.alcance[i]))));
+      const cliques=months.map(m => sum(m.paid.meta.cliques.map((v,i)=> num(v)+num(m.paid.google.cliques[i]))));
+      const leads=months.map(m => {
+        const org = (()=>{ let w=[0,0,0,0,0]; Object.values(m.organic.sources).forEach(a=>a.forEach((v,i)=>w[i]+=num(v))); Object.values(m.organic.landing).forEach(a=>a.forEach((v,i)=>w[i]+=num(v))); return w; })();
+        const paid=[0,0,0,0,0]; for(let i=0;i<5;i++) paid[i]=num(m.paid.meta.leads[i])+num(m.paid.google.leads[i]);
+        return sum(org.map((v,i)=>v+paid[i]));
+      });
+      const opp=months.map(m => sum(m.pipe.oportunidades));
+      const vendas=months.map(m => sum(m.pipe.vendas));
+
+      chartAnnual = makeOrUpdate(chartAnnual,$("#chartAnnual"),'line',{labels:MONTHS,datasets:[
+        {label:"Awareness (Alcance pago)", data:alc, tension:.25},
+        {label:"Cliques (pago)", data:cliques, tension:.25},
+        {label:"Leads (total)", data:leads, tension:.25},
+        {label:"Oportunidade", data:opp, tension:.25},
+        {label:"Vendas", data:vendas, tension:.25},
+      ]},{responsive:true, scales:{y:{beginAtZero:true}}});
+    }
+
+    /* ========================= SOCIAL CHART =================== */
+    function renderSocialChart(){
+      if(STATE.segment!=="Redes Sociais") return;
+      const s=curData();
+      const n=$("#selNet").value || Object.keys(s.networks)[0];
+      const mm=$("#selMetric").value || s.metrics[0];
+      let arr = (mm==="CTR")
+        ? Array.from({length:5},(_,i)=>calcCTR(num(s.networks[n]["Cliques"]?.[i]??0), num(s.networks[n]["Impressões"]?.[i]??0)))
+        : (s.networks[n][mm]??zeros5());
+      chartSocial = makeOrUpdate(chartSocial, $("#chartSocial"), 'line', {labels:weekLabels(), datasets:[{label:`${n} — ${mm}`, data:arr, tension:.25}]}, {responsive:true, scales:{y:{beginAtZero:true}}});
+    }
+
+    /* ========================= CONTROLES TOPO ================= */
+    $("#yearSelect").onchange=e=>{ STATE.year=parseInt(e.target.value,10); renderAll(); };
+    $("#monthSelect").onchange=e=>{ STATE.month=parseInt(e.target.value,10); renderAll(); };
+    $("#modeToggle").onchange=e=>{ STATE.mode=e.target.checked?"annual":"weekly"; renderChartsAndKpis(); };
+    $("#investView").onchange=()=> renderChartsAndKpis();
+    $("#leadPlanView").onchange=()=> renderChartsAndKpis();
+
+    // Import/Export
+    $("#importBtn").onclick=()=>$("#fileInput").click();
+    $("#fileInput").onchange=e=>{
+      const f=e.target.files[0]; if(!f) return;
+      const r=new FileReader();
+      r.onload=()=>{
+        try{
+          const o=JSON.parse(r.result);
+          if(o?.data){
+            SEGMENTS.forEach(seg=>{
+              if(o.data[seg]){
+                YEARS.forEach(y=>{
+                  if(o.data[seg][y]) STATE.data[seg][y]=o.data[seg][y];
+                });
+              }
+            });
+            if(o.year && YEARS.includes(o.year)) { STATE.year=o.year; $("#yearSelect").value=String(o.year); }
+            if(typeof o.month==="number") { STATE.month=Math.max(0,Math.min(11,o.month)); $("#monthSelect").value=String(STATE.month); }
+            if(o.segment && SEGMENTS.includes(o.segment)) {
+              STATE.segment=o.segment;
+              $$(".seg-tab").forEach(x=>x.classList.toggle('active', x.dataset.seg===STATE.segment));
+            }
+          }
+          toggleAreas(); renderAll();
+        }catch(_){ alert("JSON inválido."); }
+      };
+      r.readAsText(f); e.target.value="";
+    };
+    $("#exportBtn").onclick=()=>{
+      const blob=new Blob([JSON.stringify(STATE,null,2)],{type:'application/json'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+      a.download=`camerite-dashboard-${STATE.year}.json`; a.click(); URL.revokeObjectURL(a.href);
+    };
+
+    /* ========================= RENDER ROOT ==================== */
+    function renderAll(){
+      if(!monthEnabled()){
+        $$(".num").forEach(n=>{ n.disabled=true; });
+        return;
+      } else {
+        $$(".num").forEach(n=>{ if(!n.hasAttribute('readonly')) n.disabled=false; });
+      }
+      if(STATE.segment==="Redes Sociais"){
+        renderSocial();
+        return;
+      }
+      renderOrganic();
+      renderPaid();
+      fillPipeTable();
+      renderChartsAndKpis();
+    }
+
+    // init
+    toggleAreas();
+    renderAll();
+
+    // somente scroll vertical
+    window.addEventListener('load',()=>{
+      document.documentElement.style.overflowX='hidden';
+      document.body.style.overflowX='hidden';
+    });
+  </script>
 </body>
 </html>
